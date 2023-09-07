@@ -29,7 +29,7 @@ public class APITest extends BaseTest {
 
     @Test
     @DisplayName("Добавление и получение товаров")
-    @Description("Проверка добавления и получения списка товаров через API")
+    @Description("Проверка добавления и получения товаров через API")
     public void testShouldReturnFoodsAfterAdding() {
         Food food = createTestFood(EXOTIC_FOOD, VEGETABLE, true);
 
@@ -38,14 +38,17 @@ public class APITest extends BaseTest {
         int oldApiFoodListSize = oldApiFoodList.size();
         int oldDbFoodListSize = oldDbFoodList.size();
 
+        Assertions.assertFalse(oldApiFoodList.contains(food),
+                "Товара " + food + "не должно быть в списке");
+        Assertions.assertEquals(oldApiFoodList, oldDbFoodList,
+                "Списки должны быть равны");
+        Assertions.assertEquals(oldApiFoodListSize, oldDbFoodListSize,
+                "Размеры списка товаров из БД и API должны совпадать");
+
         Optional<Food> oldFoodOptional = dbService.findBy(food);
 
         Assertions.assertFalse(oldFoodOptional.isPresent(),
                 "Товара " + food + " не должно быть в БД");
-        Assertions.assertEquals(oldApiFoodList, oldDbFoodList,
-                "Объекты должны быть равны");
-        Assertions.assertEquals(oldApiFoodListSize, oldDbFoodListSize,
-                "Размеры списка товаров из БД и API должны совпадать");
 
         apiService.add(food);
 
@@ -54,12 +57,6 @@ public class APITest extends BaseTest {
         int newApiFoodListSize = newApiFoodList.size();
         int newDbFoodListSize = newDbFoodList.size();
 
-        Optional<Food> newFoodOptional = dbService.findBy(food);
-
-        Assertions.assertTrue(newFoodOptional.isPresent(),
-                "Товар " + food + "должен быть в БД");
-        Assertions.assertEquals(food, newFoodOptional.get(),
-                "Товары должны быть равны");
         Assertions.assertNotEquals(oldApiFoodList, newApiFoodList,
                 "Объекты не должны быть равны");
         Assertions.assertTrue(oldApiFoodListSize < newApiFoodListSize,
@@ -68,6 +65,22 @@ public class APITest extends BaseTest {
                 "Объекты не должны быть равны");
         Assertions.assertTrue(oldDbFoodListSize < newDbFoodListSize,
                 "Размер нового списка БД после добавления товара должен быть больше старого");
+
+        Optional<Food> newFoodOptional = dbService.findBy(food);
+
+        Assertions.assertTrue(newFoodOptional.isPresent(),
+                "Товар " + food + "должен быть в БД");
+        Assertions.assertEquals(food, newFoodOptional.get(),
+                "Товары должны быть равны");
+
+        Optional<Food> foodFromApiList = newApiFoodList.stream()
+                .filter(f -> f.equals(food))
+                .findFirst();
+
+        Assertions.assertTrue(foodFromApiList.isPresent(),
+                "Товар " + food + "должен находиться в результирующем списке API");
+        Assertions.assertEquals(food, foodFromApiList.get(),
+                "Товары должны быть равны");
     }
 
     @Test
