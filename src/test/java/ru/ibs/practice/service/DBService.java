@@ -11,7 +11,7 @@ public interface DBService {
 
     List<Food> findAll();
 
-    Optional<Food> findByName(String name);
+    Optional<Food> findBy(Food food);
 
     void removeProductByName(String name);
 

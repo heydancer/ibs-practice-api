@@ -17,7 +17,7 @@ public class DBServiceImpl implements DBService {
     private static final String SQL_SHOW_TABLES = "SHOW TABLES;";
     private static final String SQL_INSERT_FOOD = "INSERT INTO food(food_name, food_type, food_exotic) VALUES (?, ?, ?);";
     private static final String SQL_SELECT_ALL_FOOD = "SELECT * FROM food;";
-    private static final String SQL_SELECT_FOOD_NAME = "SELECT * FROM food WHERE food_name = ?;";
+    private static final String SQL_SELECT_FOOD = "SELECT * FROM food WHERE food_name = ? AND food_type = ? AND food_exotic = ?";
     private static final String SQL_DELETE_FOOD = "DELETE FROM food WHERE food_name = ?;";
     private final JdbcTemplate jdbcTemplate;
 
@@ -36,18 +36,18 @@ public class DBServiceImpl implements DBService {
 
     @Step("Выполнен SQL-запроса для получения товара по названию {name}")
     @Override
-    public Optional<Food> findByName(String name) {
-        log.info("Выполнение SQL-запроса для получения товара по названию {}", name);
+    public Optional<Food> findBy(Food food) {
+        log.info("Выполнение SQL-запроса для получения товара {}", food);
 
         try {
-            Food food = jdbcTemplate.queryForObject(SQL_SELECT_FOOD_NAME, (rs, rowNum) -> Food.builder()
+            Food foodFromDb = jdbcTemplate.queryForObject(SQL_SELECT_FOOD, (rs, rowNum) -> Food.builder()
                     .id(rs.getInt("food_id"))
                     .name(rs.getString("food_name"))
                     .type(FoodType.valueOf(rs.getString("food_type")))
                     .exotic(rs.getBoolean("food_exotic"))
-                    .build(), name);
+                    .build(), food.getName(), food.getType().toString(), food.isExotic());
 
-            return Optional.ofNullable(food);
+            return Optional.ofNullable(foodFromDb);
         } catch (DataAccessException e) {
             return Optional.empty();
         }

@@ -38,6 +38,10 @@ public class APITest extends BaseTest {
         int oldApiFoodListSize = oldApiFoodList.size();
         int oldDbFoodListSize = oldDbFoodList.size();
 
+        Optional<Food> oldFoodOptional = dbService.findBy(food);
+
+        Assertions.assertFalse(oldFoodOptional.isPresent(),
+                "Товара " + food + " не должно быть в БД");
         Assertions.assertEquals(oldApiFoodList, oldDbFoodList,
                 "Объекты должны быть равны");
         Assertions.assertEquals(oldApiFoodListSize, oldDbFoodListSize,
@@ -50,10 +54,16 @@ public class APITest extends BaseTest {
         int newApiFoodListSize = newApiFoodList.size();
         int newDbFoodListSize = newDbFoodList.size();
 
+        Optional<Food> newFoodOptional = dbService.findBy(food);
+
+        Assertions.assertTrue(newFoodOptional.isPresent(),
+                "Товар " + food + "должен быть в БД");
+        Assertions.assertEquals(food, newFoodOptional.get(),
+                "Товары должны быть равны");
         Assertions.assertNotEquals(oldApiFoodList, newApiFoodList,
                 "Объекты не должны быть равны");
         Assertions.assertTrue(oldApiFoodListSize < newApiFoodListSize,
-               "Размер нового списка API после добавления товара должен быть больше старого");
+                "Размер нового списка API после добавления товара должен быть больше старого");
         Assertions.assertNotEquals(oldDbFoodList, newDbFoodList,
                 "Объекты не должны быть равны");
         Assertions.assertTrue(oldDbFoodListSize < newDbFoodListSize,
@@ -67,14 +77,14 @@ public class APITest extends BaseTest {
         Food food = createTestFood(NON_EXOTIC_FOOD, VEGETABLE, false);
         Optional<Food> foodOptional;
 
-        foodOptional = dbService.findByName(NON_EXOTIC_FOOD);
+        foodOptional = dbService.findBy(food);
 
         Assertions.assertFalse(foodOptional.isPresent(),
                 "Продукта: " + food + " не должно быть в базе данных");
 
         apiService.add(food);
 
-        foodOptional = dbService.findByName(NON_EXOTIC_FOOD);
+        foodOptional = dbService.findBy(food);
 
         Assertions.assertTrue(foodOptional.isPresent(),
                 "Продукт: " + food + " должен быть в базе данных");
@@ -96,14 +106,14 @@ public class APITest extends BaseTest {
         Food food = createTestFood(EXOTIC_FOOD, FRUIT, true);
         Optional<Food> foodOptional;
 
-        foodOptional = dbService.findByName(EXOTIC_FOOD);
+        foodOptional = dbService.findBy(food);
 
         Assertions.assertFalse(foodOptional.isPresent(),
                 "Продукта: " + food + " не должно быть в базе данных");
 
         apiService.add(food);
 
-        foodOptional = dbService.findByName(EXOTIC_FOOD);
+        foodOptional = dbService.findBy(food);
 
         Assertions.assertTrue(foodOptional.isPresent(),
                 "Продукт: " + food + " должен быть в базе данных");
